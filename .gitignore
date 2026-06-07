@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Editor backups
+*.py~
+*~
+
+# Output files
+perfect_out.txt
+*.txt
+
+# OS
+.DS_Store

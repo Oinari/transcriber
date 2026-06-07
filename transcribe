@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+VENV=/home/sysop/transcriber/.venv
+NV="$VENV/lib/python3.13/site-packages/nvidia"
+export LD_LIBRARY_PATH=\
+"$NV/cublas/lib:\
+$NV/cuda_runtime/lib:\
+$NV/cudnn/lib:\
+${LD_LIBRARY_PATH:-}"
+exec "$VENV/bin/python" /home/sysop/transcriber/transcriber.py "$@"
