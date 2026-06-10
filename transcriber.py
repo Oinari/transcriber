@@ -95,6 +95,7 @@ THEME_NARRATIVE_SYSTEM = """\
 - Не начинай текст с названия темы.
 - Без маркированных списков и вводных фраз.
 - Сохраняй голос и юмор оригинала.
+- ЗАПРЕЩЕНО: описывать что ты делаешь, пересказывать задание, писать «Пользователь просит...», «В транскрипте...», «Рассмотрим...» и любые метакомментарии. Первое предложение — сразу содержательный текст.
 Верни JSON с полем "prose" — строка с готовым текстом."""
 
 TRANSLATION_SYSTEM = """\
@@ -307,10 +308,25 @@ def parse_llm_json(raw: str) -> dict:
         raise typer.Exit(1) from e
 
 
+_META_PREFIXES = re.compile(
+    r"^(Пользователь\s+просит|В\s+транскрипте|Рассмотрим|Давайте\s+рассмотрим|"
+    r"Итак|Нужно\s+написать|Задание|Транскрипт\s+описывает|Тема\s+[«\"])",
+    re.IGNORECASE,
+)
+
+
+def _strip_prose_meta(text: str) -> str:
+    """Drop leading sentences that are meta-commentary rather than actual prose."""
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    while sentences and _META_PREFIXES.match(sentences[0]):
+        sentences = sentences[1:]
+    return " ".join(sentences).strip()
+
+
 def _parse_narrative(raw: str, label: str = "") -> str:
     """Extract prose string from NarrativeBlock JSON with fallback attempts."""
     def clean(text: str) -> str:
-        return strip_thinking(text).strip()
+        return _strip_prose_meta(strip_thinking(text)).strip()
 
     # 1. Direct parse (happy path — json_schema gives clean JSON)
     try:
